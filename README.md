@@ -3,6 +3,10 @@ mimic_reader
 
 interface for doing data science with mimic
 
+TODO: dynamic dataframes are currenlty VALUE - TIMESTAMP, should be standardized to e.g. hourly
+TODO: survival data needs censorship indicator, how to encode for mort_icu type outcome?
+
+
 Project Organization
 ------------
 

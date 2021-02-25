@@ -1,5 +1,13 @@
 import pandas as pd
 
+
+def read_local_data(data_dir):
+    static_vars = pd.read_csv(data_dir + 'static_vars.csv')
+    dynamic_vars = pd.read_csv(data_dir + 'dynamic_vars.csv')
+    outcome_vars = pd.read_csv(data_dir + 'outcome_vars.csv')
+
+    return static_vars, dynamic_vars, outcome_vars
+
 def read_all_data(data_dir):
     inpatients_records = pd.read_csv(
         data_dir + 'CDSL_01.csv', sep=',')

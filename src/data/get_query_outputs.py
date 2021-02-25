@@ -377,7 +377,7 @@ def get_static_covariates_query(eligibility_query_prefix, query_dir = './src/que
     query_parsed = eligibility_query_prefix + query_raw # no formatting needed
     return query_parsed
 
-def get_outcomes_query(eligibility_query_prefix, query_dir = './src/queries/'):    
+def get_outcomes_query(eligibility_query_prefix, query_dir = './src/queries/') -> str:    
     with open(query_dir +  'outcomes.sql','r') as f:
         query_raw = f.read()
     query_parsed = eligibility_query_prefix + query_raw # no formatting needed yet
@@ -443,6 +443,10 @@ if __name__ == '__main__':
     static_covariates_query = get_static_covariates_query(eligibility_query_prefix)
     dynamic_covariates_query = get_dynamic_covariates_query(eligibility_query_prefix)
 
+    outcomes_query = get_outcomes_query(eligibility_query_prefix)
+
+
+    inputs_query = get_inputs_query(eligibility_query_prefix)
     #print('getting dynamic covariates')
     #dynamic_covariates = pd.read_sql_query(dynamic_query, con)
     #print('got dynamic covariates')
@@ -474,7 +478,7 @@ if __name__ == '__main__':
     #interpolated_dyn_cov.to_csv('./data/processed/interpolated_dyn_cov.csv')
     #print('done!')
 
-    print(dynamic_covariates_query)
+    print(inputs_query)
     #print(static_covariates_query)
 
 
@@ -487,6 +491,8 @@ if __name__ == '__main__':
     rewrite_data = {}
     rewrite_data['static'] = False
     rewrite_data['dynamic'] = False
+    rewrite_data['outcomes'] = False
+    rewrite_data['inputs'] = False
     
     if ~os.path.exists(root_dir + './data/external/static_vars.csv') or rewrite_data['static']:
         query_job = client.query(static_covariates_query)
@@ -497,6 +503,21 @@ if __name__ == '__main__':
         query_job = client.query(dynamic_covariates_query)
         results = query_job.result().to_dataframe()
         results.to_csv(root_dir + './data/external/dynamic_vars.csv', index=False)
+
+    if ~os.path.exists(root_dir + './data/external/outcome_vars.csv') or rewrite_data['outcomes']:
+            print('writing outcomes')
+            query_job = client.query(outcomes_query)
+            results = query_job.result().to_dataframe()
+            results.to_csv(root_dir + './data/external/outcome_vars.csv', index=False)
+
+
+    if ~os.path.exists(root_dir + './data/external/input_vars.csv') or rewrite_data['inputs']:
+                print('writing inputs (treatments)')
+                query_job = client.query(inputs_query)
+                results = query_job.result().to_dataframe()
+                results.to_csv(root_dir + './data/external/input_vars.csv', index=False)
+
+
 
     
     #print(results.head())
