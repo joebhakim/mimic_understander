@@ -5,6 +5,77 @@ import numpy as np
 from .icd_parsing_functions import get_code_categories, charlson_calc
 
 
+def preprocess_all(static_vars, dynamic_vars, outcome_vars, input_vars):
+
+
+    print(dynamic_vars.head())
+
+    top_k_feats = list(dynamic_vars['label'].value_counts()[:5].index)
+    id_vars = ['subject_id','hadm_id','stay_id']
+
+    dynamic_regular = get_regular_timeseries(dynamic_vars, id_vars, top_k_feats)
+    print(dynamic_regular.head())
+
+    dynamic_regular_imputed  = impute_dynamic_data(dynamic_regular,id_vars, top_k_feats)
+    print(dynamic_regular_imputed.head())
+
+    static_vars_clean = preprocess_static_vars(static_vars)
+
+    return static_vars_clean, dynamic_regular_imputed, outcome_vars, input_vars
+
+
+def preprocess_static_vars(static_vars_df: pd.DataFrame) -> pd.DataFrame:
+    static_vars_clean = static_vars_df.copy()
+
+    static_vars_clean = pd.get_dummies(static_vars_clean)
+
+    return static_vars_clean
+
+
+def get_regular_timeseries(timestamp_timeseries: pd.DataFrame, id_vars, feature_names) -> pd.DataFrame:
+    """converts a timeseries with each variable recorded as value - datetime
+    into hourly (or other interval)"""
+
+    temp  = timestamp_timeseries
+    temp['time_in'] = pd.to_datetime(temp['charttime']) - pd.to_datetime(temp['intime'])
+    temp = temp.drop(['intime','outtime','charttime','itemid','valueuom'], axis=1) #TODO: check if valueuom can be dropped
+    temp = temp.set_index(['subject_id','hadm_id','stay_id','time_in'])
+
+    temp = temp.loc[temp['label'].isin(feature_names),:]
+
+    b = pd.pivot(temp, columns=['label'])
+
+    #b = pd.pivot(temp, columns=['label', 'subject_id','hadm_id','stay_id']).head(10)
+    #b = b.reset_index()
+    b.columns = b.columns.get_level_values(1)
+    b = b.reset_index()#.set_index('time_in')
+    b[feature_names] = b[feature_names].apply(pd.to_numeric)
+    #b[id_vars] = b[id_vars].apply(pd.to_)
+
+    timestamp_timeseries = b.groupby(id_vars).resample('H', on='time_in').mean().drop(id_vars, axis=1).reset_index()
+
+    return timestamp_timeseries
+
+
+def impute_dynamic_data(dynamic_regular, id_vars, feature_names):
+
+    # first, impute by forwards filling
+    dynamic_regular_df = dynamic_regular.copy()
+    dynamic_regular_df = dynamic_regular_df.set_index(id_vars)
+    dynamic_regular_df = dynamic_regular_df.groupby(id_vars).ffill() 
+
+    #dynamic_regular_df[top_k_feats].fillna(dynamic_regular_df.groupby(id_vars).median()) personal level imputing, might information leak so dont use
+    dynamic_regular_imputed = dynamic_regular_df[feature_names].fillna(dynamic_regular_df.median()) 
+
+    return dynamic_regular_imputed
+
+
+
+
+
+
+
+
 
 def append_more_covariates(dynamic_df, drugs_covariates):
     left = dynamic_df.reset_index()

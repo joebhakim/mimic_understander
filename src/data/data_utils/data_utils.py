@@ -5,8 +5,9 @@ def read_local_data(data_dir):
     static_vars = pd.read_csv(data_dir + 'static_vars.csv')
     dynamic_vars = pd.read_csv(data_dir + 'dynamic_vars.csv')
     outcome_vars = pd.read_csv(data_dir + 'outcome_vars.csv')
+    input_vars = pd.read_csv(data_dir + 'input_vars.csv')
 
-    return static_vars, dynamic_vars, outcome_vars
+    return static_vars, dynamic_vars, outcome_vars, input_vars
 
 def read_all_data(data_dir):
     inpatients_records = pd.read_csv(

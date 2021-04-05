@@ -5,11 +5,14 @@ from pathlib import Path
 
 from data_utils.data_utils import read_local_data
 
+#from data_utils.preprocessing_utils import (
+#    get_static_vars, get_dynamic_vars, add_icds_to_static_vars, get_drugs_timeseries_df,
+#    split_treat_covariates, append_more_covariates
+#)
 from data_utils.preprocessing_utils import (
-    get_static_vars, get_dynamic_vars, add_icds_to_static_vars, get_drugs_timeseries_df,
-    split_treat_covariates, append_more_covariates
+    preprocess_all
+    #get_regular_timeseries, impute_dynamic_data
 )
-
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
@@ -22,11 +25,18 @@ def main(input_filepath, output_filepath):
     logger.info('making final data set from raw data')
 
     logger.info('reading raw data, already saved locally')
-    static_vars, dynamic_vars, outcome_vars =\
+    static_vars, dynamic_vars, outcome_vars, input_vars =\
         read_local_data(input_filepath)
 
-    print(outcome_vars.head())
-    
+
+    static_vars, dynamic_vars, outcome_vars, input_vars = \
+        preprocess_all(static_vars, dynamic_vars, outcome_vars, input_vars)
+
+    static_vars.to_csv('/home/joe/testbed/mimic_understander/data/interim/static_vars.csv')
+    dynamic_vars.to_csv('/home/joe/testbed/mimic_understander/data/interim/dynamic_vars.csv')
+    outcome_vars.to_csv('/home/joe/testbed/mimic_understander/data/interim/outcome_vars.csv')
+    #input_vars.to_csv('/home/joe/testbed/mimic_understander/data/interim/input_vars.csv')
+
     #logger.info('drugs_df')
     #drugs_timeseries_df = get_drugs_timeseries_df(inpatients_records, drugs, clinical_vars, labs,
     #                                              output_filepath,

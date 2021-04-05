@@ -434,7 +434,7 @@ if __name__ == '__main__':
         min_day_string = '0.5'
         pop_size_string = ''
 
-    root_dir = '/home/joe/mimic_understander/'
+    root_dir = '/home/joe/testbed/mimic_understander/'
 
     # used for joining rest of downstream queries
     eligibility_query_prefix = get_eligibility_query_prefix(
@@ -478,7 +478,6 @@ if __name__ == '__main__':
     #interpolated_dyn_cov.to_csv('./data/processed/interpolated_dyn_cov.csv')
     #print('done!')
 
-    print(inputs_query)
     #print(static_covariates_query)
 
 

@@ -11,5 +11,5 @@ select distinct i.subject_id, i.hadm_id, i.stay_id, i.intime, i.outtime
 		and i.los >= 0.5
 		and i.outtime >= DATETIME_ADD(i.intime, INTERVAL 12 HOUR)
 		and i.outtime <= DATETIME_ADD(i.intime, INTERVAL 240 HOUR)
-		--and icd_code like 'I48%' or icd_code like '42731%' --atrial fibrillation or atrial flutter
+		and icd_code like 'I48%' or icd_code like '42731%' --atrial fibrillation or atrial flutter
 )
